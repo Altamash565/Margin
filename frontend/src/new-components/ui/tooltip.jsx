@@ -8,24 +8,81 @@ const Tooltip = TooltipPrimitive.Root;
 
 const TooltipTrigger = TooltipPrimitive.Trigger;
 
+const TooltipArrow = TooltipPrimitive.Arrow;
+
 const TooltipContent = React.forwardRef(
-  ({ className, sideOffset = 4, children, ...props }, ref) => (
+  ({ className, sideOffset = 6, children, showArrow = true, arrowClassName, ...props }, ref) => (
     <TooltipPrimitive.Portal>
       <TooltipPrimitive.Content
         ref={ref}
         sideOffset={sideOffset}
         className={cn(
-          'bg-foreground text-background animate-in fade-in-0 zoom-in-95 data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 z-50 overflow-hidden rounded-md px-3 py-1.5 text-xs shadow-md',
+          'z-50 rounded-md bg-primary px-3 py-1.5 text-xs text-primary-foreground shadow-md animate-in fade-in-0 zoom-in-95 data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2',
           className
         )}
         {...props}
       >
         {children}
-        <TooltipPrimitive.Arrow className="bg-foreground fill-foreground z-50 size-2.5 translate-y-[calc(-50%_-_2px)] rotate-45 rounded-[2px]" />
+        {showArrow && (
+          <TooltipPrimitive.Arrow
+            className={cn('fill-primary', arrowClassName)}
+            width={10}
+            height={5}
+          />
+        )}
       </TooltipPrimitive.Content>
     </TooltipPrimitive.Portal>
   )
 );
 TooltipContent.displayName = TooltipPrimitive.Content.displayName;
 
-export { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider };
+/**
+ * SimpleTooltip - Convenience wrapper matching shadcn tooltip patterns:
+ * 
+ * Usage:
+ * <SimpleTooltip content="Add to library">
+ *   <Button variant="outline">Hover</Button>
+ * </SimpleTooltip>
+ */
+const SimpleTooltip = ({
+  children,
+  content,
+  side = 'top',
+  align = 'center',
+  sideOffset = 6,
+  delayDuration = 150,
+  showArrow = true,
+  className,
+  ...props
+}) => {
+  if (!content) return children;
+
+  return (
+    <TooltipProvider delayDuration={delayDuration}>
+      <Tooltip>
+        <TooltipTrigger asChild>{children}</TooltipTrigger>
+        <TooltipContent
+          side={side}
+          align={align}
+          sideOffset={sideOffset}
+          showArrow={showArrow}
+          className={className}
+          {...props}
+        >
+          {typeof content === 'string' ? <p>{content}</p> : content}
+        </TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
+  );
+};
+
+export {
+  Tooltip,
+  TooltipTrigger,
+  TooltipContent,
+  TooltipProvider,
+  TooltipArrow,
+  SimpleTooltip,
+};
+
+
